@@ -15,7 +15,11 @@ import {
   SKILL_REPOS,
   WORKFLOW_SKILL_REPOS,
 } from './skills-install';
-import { hasNpx, installSkillsNative } from './skills-native';
+import {
+  hasNpx,
+  installSkillsNative,
+  detectInstalledAgentNames,
+} from './skills-native';
 import {
   configureWebDefaults,
   WEB_AGENTS,
@@ -186,6 +190,50 @@ async function installSkillRepoQuiet(
   // No npx — fall back to native installer. It prints its own status.
   await installSkillsNative(repo);
   return null;
+}
+
+/**
+ * Prompt for which harnesses should receive the skills. Returns an explicit
+ * subset, or `null` to mean "all detected agents" (the broad `--all` path,
+ * which also covers agents npx knows about but that aren't detected locally).
+ */
+async function pickHarnesses(): Promise<string[] | null> {
+  const detected = detectInstalledAgentNames();
+  // Nothing detected locally — fall back to the broad install.
+  if (detected.length === 0) return null;
+
+  const { checkbox } = await import('@inquirer/prompts');
+  const selected = await checkbox<string>({
+    message: 'Which agents/harnesses should get the skills?',
+    choices: detected.map((name) => ({ name, value: name, checked: true })),
+  });
+
+  // Empty selection or "all of them" both map to the broad --all install.
+  if (selected.length === 0 || selected.length === detected.length) return null;
+  return selected;
+}
+
+/**
+ * Install one skill repo across the chosen harnesses. `agents === null` uses
+ * the broad `--all` install; otherwise the repo is linked into each named
+ * agent. The skill count is reported once (the same skills are copied to each
+ * agent), so a multi-agent install does not inflate the total.
+ */
+async function installRepoAcrossAgents(
+  repo: string,
+  options: InitOptions,
+  agents: string[] | null
+): Promise<number | null> {
+  if (!agents) {
+    return installSkillRepoQuiet(repo, options);
+  }
+
+  let count: number | null = null;
+  for (const agent of agents) {
+    const c = await installSkillRepoQuiet(repo, { ...options, agent });
+    if (count == null) count = c;
+  }
+  return count;
 }
 
 /** Parse "Found N skills" or "Installed N skills" from npx skills output. */
@@ -460,6 +508,18 @@ async function stepIntegrations(options: InitOptions): Promise<number | null> {
     return null;
   }
 
+  // If skills/workflows are being installed, let the user route them to a
+  // subset of harnesses. An explicit --agent flag wins and skips the prompt;
+  // otherwise the default is every detected harness (null → --all).
+  const installsSkills =
+    integrations.includes('skills') || integrations.includes('workflows');
+  const targetAgents: string[] | null =
+    installsSkills && !options.agent
+      ? await pickHarnesses()
+      : options.agent
+        ? [options.agent]
+        : null;
+
   let totalSkills: number | null = null;
   for (const integration of integrations) {
     switch (integration) {
@@ -467,7 +527,11 @@ async function stepIntegrations(options: InitOptions): Promise<number | null> {
         console.log(`\n  Installing skills...`);
         for (const repo of SKILL_REPOS) {
           try {
-            const count = await installSkillRepoQuiet(repo, options);
+            const count = await installRepoAcrossAgents(
+              repo,
+              options,
+              targetAgents
+            );
             if (count != null) totalSkills = (totalSkills ?? 0) + count;
           } catch {
             console.error(
@@ -481,7 +545,11 @@ async function stepIntegrations(options: InitOptions): Promise<number | null> {
         console.log(`\n  Installing workflow skills...`);
         for (const repo of WORKFLOW_SKILL_REPOS) {
           try {
-            const count = await installSkillRepoQuiet(repo, options);
+            const count = await installRepoAcrossAgents(
+              repo,
+              options,
+              targetAgents
+            );
             if (count != null) totalSkills = (totalSkills ?? 0) + count;
           } catch {
             console.error(
