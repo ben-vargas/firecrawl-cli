@@ -135,6 +135,44 @@ async function installSkillRepoQuiet(
 ): Promise<number | null> {
   const label = skillRepoLabel(repo);
 
+  // Prefer the native installer when we can detect installed harnesses.
+  // It creates symlinks to ~/.agents/skills/ (single source of truth) and
+  // only touches agents whose ~/.<agent> dirs actually exist — unlike
+  // `npx skills add --all` which sprays to every agent npx knows about.
+  const detected = detectInstalledAgentNames();
+  const useNative =
+    // Explicit --agent → always native (scoped + symlinked)
+    options.agent ||
+    // No --all flag → native with detected agents only
+    !options.all ||
+    // --all but nothing detected locally → native will detect + symlink
+    detected.length > 0;
+
+  if (useNative) {
+    try {
+      const result = await installSkillsNative(repo, {
+        agent: options.agent,
+        quiet: true,
+      });
+      const suffix = ` ${dim}(${result.skillCount})${reset}`;
+      const linked =
+        result.linkedAgents.length > 0
+          ? ` ${dim}→ ${result.linkedAgents.join(', ')}${reset}`
+          : '';
+      console.log(`  ${green}✓${reset} ${label}${suffix}${linked}`);
+      return result.skillCount;
+    } catch (err) {
+      console.log(`  ${dim}✗${reset} ${label}`);
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      console.error(`    ${dim}${msg}${reset}`);
+
+      // Fall through to npx if native failed and npx is available
+      if (!hasNpx()) throw err;
+      console.log(`  ${dim}Retrying with npx...${reset}`);
+    }
+  }
+
+  // Fallback: npx skills add (copies files, may spray to all agents)
   if (hasNpx()) {
     const args = buildSkillsInstallArgs({
       repo,
@@ -187,8 +225,7 @@ async function installSkillRepoQuiet(
     }
   }
 
-  // No npx — fall back to native installer. It prints its own status.
-  await installSkillsNative(repo);
+  // No npx and native already failed — nothing left to try
   return null;
 }
 
@@ -214,9 +251,10 @@ async function pickHarnesses(): Promise<string[] | null> {
 }
 
 /**
- * Install one skill repo across the chosen harnesses. `agents === null` uses
- * the broad `--all` install; otherwise the repo is linked into each named
- * agent. The skill count is reported once (the same skills are copied to each
+ * Install one skill repo across the chosen harnesses. `agents === null` lets
+ * the native installer detect and symlink to every installed harness in one
+ * pass; otherwise the repo is linked into each named agent individually.
+ * The skill count is reported once (the same skills are symlinked to each
  * agent), so a multi-agent install does not inflate the total.
  */
 async function installRepoAcrossAgents(
