@@ -215,15 +215,15 @@ function firecrawlMcpHeaders(
   const apiKey = getApiKey();
   if (!apiKey) return undefined;
 
-  if (isEnvironmentBackedApiKey(apiKey)) {
-    const environmentHeader = environmentHeaderForAgent(agent);
-    if (environmentHeader) return { Authorization: environmentHeader };
-    throw new Error(
-      'This MCP client does not have a verified environment-variable syntax. Choose a supported --agent, use --agent all, or configure the client manually so FIRECRAWL_API_KEY is not persisted as a literal.'
-    );
-  }
-
-  return { Authorization: `Bearer ${apiKey}` };
+  // Keep this helper safe in isolation. Callers currently reject stored keys
+  // before reaching it, but a future call site must not turn one into a raw
+  // Authorization header in argv or a client configuration file.
+  assertSubprocessSafeCredential(apiKey);
+  const environmentHeader = environmentHeaderForAgent(agent);
+  if (environmentHeader) return { Authorization: environmentHeader };
+  throw new Error(
+    'This MCP client does not have a verified environment-variable syntax. Choose a supported --agent, use --agent all, or configure the client manually so FIRECRAWL_API_KEY is not persisted as a literal.'
+  );
 }
 
 function resolveMcpAgent(agent: string | undefined): ResolvedMcpAgent {
@@ -675,7 +675,6 @@ function firecrawlMcpConfig(agent?: string): {
 }
 
 export async function installHermesMcp(): Promise<void> {
-  assertSubprocessSafeCredential();
   const config = firecrawlMcpConfig('hermes');
   const configPath = path.join(os.homedir(), '.hermes', 'config.yaml');
   mkdirSync(path.dirname(configPath), { recursive: true });
@@ -704,7 +703,6 @@ export async function installHermesMcp(): Promise<void> {
 }
 
 export async function installOpenClawMcp(): Promise<void> {
-  assertSubprocessSafeCredential();
   const config = {
     ...firecrawlMcpConfig('openclaw'),
     transport: 'streamable-http',
