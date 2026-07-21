@@ -305,27 +305,32 @@ describe('handleSetupCommand', () => {
     );
   });
 
-  it('writes Hermes MCP config with Firecrawl credentials', async () => {
+  it('rejects a stored key before writing Hermes MCP config', async () => {
     const home = mkdtempSync(path.join(os.tmpdir(), 'firecrawl-hermes-test-'));
     process.env.HOME = home;
     const configPath = path.join(home, '.hermes', 'config.yaml');
     mkdirSync(path.dirname(configPath), { recursive: true });
-    writeFileSync(
-      configPath,
-      'theme: dark\nmcp_servers:\n  existing:\n    url: https://example.com/mcp\n'
-    );
+    const originalConfig =
+      'theme: dark\nmcp_servers:\n  existing:\n    url: https://example.com/mcp\n';
+    writeFileSync(configPath, originalConfig, { mode: 0o600 });
 
     try {
-      await installHermesMcp();
+      await expect(
+        handleSetupCommand('mcp', {
+          agent: 'hermes',
+          global: true,
+          yes: true,
+        })
+      ).rejects.toThrow('Export FIRECRAWL_API_KEY');
 
       const config = readFileSync(configPath, 'utf-8');
+      expect(config).toBe(originalConfig);
       expect(config).toContain('theme: dark');
       expect(config).toContain('existing:');
       expect(config).toContain('mcp_servers:');
-      expect(config).toContain('firecrawl:');
-      expect(config).toContain('url: https://mcp.firecrawl.dev/v2/mcp');
-      expect(config).toContain('Authorization: Bearer fc-test-key');
-      expect(config).not.toContain('/fc-test-key/');
+      expect(config).not.toContain('firecrawl:');
+      expect(config).not.toContain('fc-test-key');
+      expect(execFileSync).not.toHaveBeenCalled();
       if (process.platform !== 'win32') {
         expect(statSync(configPath).mode & 0o777).toBe(0o600);
       }

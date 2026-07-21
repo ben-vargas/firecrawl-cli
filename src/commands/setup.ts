@@ -675,6 +675,7 @@ function firecrawlMcpConfig(agent?: string): {
 }
 
 export async function installHermesMcp(): Promise<void> {
+  assertSubprocessSafeCredential();
   const config = firecrawlMcpConfig('hermes');
   const configPath = path.join(os.homedir(), '.hermes', 'config.yaml');
   mkdirSync(path.dirname(configPath), { recursive: true });
