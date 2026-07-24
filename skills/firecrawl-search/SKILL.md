@@ -42,11 +42,13 @@ firecrawl search "your query" --sources news --tbs qdr:d -o .firecrawl/news.json
 | `--country <code>`                   | Country code for search                       |
 | `--scrape`                           | Also scrape full page content for each result |
 | `--scrape-formats`                   | Formats when scraping (default: markdown)     |
+| `--highlights` / `--no-highlights`   | Query-relevant excerpts vs. original snippets |
 | `-o, --output <path>`                | Output file path                              |
 | `--json`                             | Output as JSON                                |
 
 ## Tips
 
+- **`--highlights` is on by default.** Firecrawl's relevance model scores every paragraph/list/table on the page against your query and returns only the excerpts that answer it, instead of full-page noise. Use `--no-highlights` to get the original snippets. This is a server-side upgrade (works with or without the flag), but the flag lets you control it explicitly.
 - **`--scrape` fetches full content** — don't re-scrape URLs from search results. This saves credits and avoids redundant fetches.
 - Always write results to `.firecrawl/` with `-o` to avoid context window bloat.
 - Use `jq` to extract URLs or titles: `jq -r '.data.web[].url' .firecrawl/search.json`
