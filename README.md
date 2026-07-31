@@ -286,6 +286,9 @@ firecrawl search "web data python" --categories github
 firecrawl search "transformer architecture" --categories research
 firecrawl search "machine learning" --categories github,research
 
+# Developer search: GitHub issues, merged PRs, READMEs, and docs
+firecrawl search "axum middleware ordering" --categories developer
+
 # Time-based search
 firecrawl search "AI announcements" --tbs qdr:d   # Past day
 firecrawl search "tech news" --tbs qdr:w          # Past week
@@ -308,7 +311,7 @@ firecrawl search "AI data tools"
 | ---------------------------- | ------------------------------------------------------------------------------------------- |
 | `--limit <n>`                | Maximum results (default: 5, max: 100)                                                      |
 | `--sources <sources>`        | Comma-separated: `web`, `images`, `news` (default: web)                                     |
-| `--categories <categories>`  | Comma-separated: `github`, `research`, `pdf`                                                |
+| `--categories <categories>`  | Comma-separated: `github`, `research`, `pdf`, `developer`                                   |
 | `--tbs <value>`              | Time filter: `qdr:h` (hour), `qdr:d` (day), `qdr:w` (week), `qdr:m` (month), `qdr:y` (year) |
 | `--location <location>`      | Geo-targeting (e.g., "Germany", "San Francisco,California,United States")                   |
 | `--country <code>`           | ISO country code (default: US)                                                              |
@@ -336,6 +339,9 @@ firecrawl search "firecrawl documentation" --scrape --scrape-formats markdown --
 
 # Find research papers
 firecrawl search "large language models" --categories research --json
+
+# Answer a programming question from issues, merged PRs, READMEs, and docs
+firecrawl search "tokio select cancellation safety" --categories developer --json
 
 # Search with location targeting
 firecrawl search "best coffee shops" --location "Berlin,Germany" --country DE

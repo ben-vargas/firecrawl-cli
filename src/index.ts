@@ -919,7 +919,7 @@ function createSearchCommand(): Command {
     )
     .option(
       '--categories <categories>',
-      'Comma-separated categories to filter: github, research, pdf'
+      'Comma-separated categories to filter: github, research, pdf, developer (developer searches indexed GitHub issues, merged PRs, READMEs, and docs)'
     )
     .option(
       '--tbs <value>',
@@ -1001,7 +1001,7 @@ function createSearchCommand(): Command {
           .map((c: string) => c.trim().toLowerCase()) as SearchCategory[];
 
         // Validate categories
-        const validCategories = ['github', 'research', 'pdf'];
+        const validCategories = ['github', 'research', 'pdf', 'developer'];
         for (const category of categories) {
           if (!validCategories.includes(category)) {
             console.error(
