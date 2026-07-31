@@ -20,6 +20,7 @@ import { handleMapCommand } from './commands/map';
 import { handleParseCommand } from './commands/parse';
 import { createMonitorCommand } from './commands/monitor';
 import { handleSearchCommand } from './commands/search';
+import { handleDeveloperSearchCommand } from './commands/developer';
 import {
   handleInspectPaperCommand,
   handleReadPaperCommand,
@@ -1048,6 +1049,52 @@ function createSearchCommand(): Command {
 }
 
 /**
+ * Create and configure the developer command
+ */
+function createDeveloperCommand(): Command {
+  const developerCmd = new Command('developer')
+    .description(
+      'Search an index built for coding agents: GitHub issues, merged PRs, repository READMEs, and curated documentation sites. Use it for a programming question: code behaviour, a library or framework, an API contract, an error message, or a known bug. Returns ranked results with id, type, url, title, and the matched passages in markdown.'
+    )
+    .argument('<query>', 'Natural-language developer question or search phrase')
+    .option(
+      '--limit <number>',
+      'Number of results to return (default: 20, max: 100)',
+      parseInt
+    )
+    .addOption(new Option('--k <number>').argParser(parseInt).hideHelp())
+    .option(
+      '-k, --api-key <key>',
+      'Firecrawl API key (overrides global --api-key)'
+    )
+    .option('--api-url <url>', 'API URL (overrides global --api-url)')
+    .option('-o, --output <path>', 'Output file path (default: stdout)')
+    .option('--json', 'Output as compact JSON', false)
+    .option('--pretty', 'Pretty print JSON output', false)
+    .addHelpText(
+      'after',
+      `
+Examples:
+  $ firecrawl developer "axum middleware ordering" --limit 10
+  $ firecrawl developer "tokio select cancellation safety" --json
+`
+    )
+    .action(async (query, options) => {
+      await handleDeveloperSearchCommand({
+        query,
+        k: researchLimit(options),
+        apiKey: options.apiKey,
+        apiUrl: options.apiUrl,
+        output: options.output,
+        json: options.json,
+        pretty: options.pretty,
+      });
+    });
+
+  return developerCmd;
+}
+
+/**
  * Create and configure the research command group
  */
 function createResearchCommand(): Command {
@@ -2038,6 +2085,7 @@ program.addCommand(createMapCommand());
 program.addCommand(createParseCommand());
 program.addCommand(createMonitorCommand());
 program.addCommand(createSearchCommand());
+program.addCommand(createDeveloperCommand());
 program.addCommand(createResearchCommand());
 program.addCommand(createFeedbackCommand());
 program.addCommand(createSearchFeedbackCommand());

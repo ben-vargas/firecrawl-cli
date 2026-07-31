@@ -45,6 +45,18 @@ holds `url`, `title`, and `description`, where `description` is the matched
 passage. Read the passages with
 `jq -r '.data.developer[] | .url, .description' .firecrawl/developer.json`.
 
+The dedicated `firecrawl developer` command searches only that index and keeps
+the full matched passages:
+
+```bash
+# Developer search only, with full passages
+firecrawl developer "your query" --limit 10 -o .firecrawl/developer.json --json
+```
+
+Each result holds `id`, `type` (`issue`, `pull_request`, `readme`, `doc`),
+`url`, `title`, and `passages`. Read them with
+`jq -r '.results[] | .url, .passages[].text' .firecrawl/developer.json`.
+
 ## Options
 
 | Option                                         | Description                                   |

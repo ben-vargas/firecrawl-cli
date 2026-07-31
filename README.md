@@ -352,6 +352,35 @@ firecrawl search "AI startups funding" --sources news --tbs qdr:w --limit 15
 
 ---
 
+### `developer` - Search developer sources
+
+Search an index built for coding agents: GitHub issues, merged pull requests, repository READMEs, and curated documentation sites. Use it for a programming question: code behaviour, a library or framework, an API contract, an error message, or a known bug.
+
+```bash
+firecrawl developer "axum middleware ordering"
+```
+
+#### Options
+
+| Option                | Description                               |
+| --------------------- | ----------------------------------------- |
+| `--limit <n>`         | Number of results (default: 20, max: 100) |
+| `-o, --output <path>` | Save to file                              |
+| `--json`              | Output as compact JSON                    |
+| `--pretty`            | Pretty print JSON output                  |
+
+#### Examples
+
+```bash
+# Investigate a known bug
+firecrawl developer "tokio spawn_blocking panics thread limit" --limit 10
+
+# Keep the full passages for an agent
+firecrawl developer "tokio select cancellation safety" --json -o results.json
+```
+
+---
+
 ### `feedback` - Send endpoint job feedback
 
 Send concise feedback for a completed v2 `search`, `scrape`, `parse`, or `map`
