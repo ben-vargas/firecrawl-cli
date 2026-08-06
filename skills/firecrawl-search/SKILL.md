@@ -75,7 +75,7 @@ Each result holds `id`, `type` (`issue`, `pull_request`, `readme`, `doc`),
 
 ## Tips
 
-- **`--highlights` is on by default:** results are query-relevant excerpts, not full-page snippets. Use `--no-highlights` for the original snippets.
+- **`--highlights` on by default:** results are query-relevant excerpts, not full-page snippets. Use `--no-highlights` for the original snippets.
 - **`--scrape` fetches full content** — don't re-scrape URLs from search results. This saves credits and avoids redundant fetches.
 - Always write results to `.firecrawl/` with `-o` to avoid context window bloat.
 - Use `jq` to extract URLs or titles: `jq -r '.data.web[].url' .firecrawl/search.json`
