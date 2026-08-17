@@ -11,6 +11,8 @@ allowed-tools:
 
 > **Experimental.** `download` is available under the `firecrawl x` command group.
 
+**Prerequisite:** `download` requires authentication (no keyless free tier); without credentials the CLI prompts an interactive login.
+
 Maps the site origin first to discover pages, then scrapes each one into nested directories under `.firecrawl/`. Use `--include-paths` to scope a non-root URL to one section. Supported scrape options are listed below. Always pass `-y` to skip the confirmation prompt.
 
 ## When to use
