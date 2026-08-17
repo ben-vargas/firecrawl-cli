@@ -267,7 +267,8 @@ jq -r '.data.web[] | "\(.title): \(.url)"' .firecrawl/search.json
 Search costs 2 credits per call. **After you finish using a search result**, send structured feedback in the background. The first feedback per search id refunds 1 credit and feeds search-quality improvements.
 
 ```bash
-SEARCH_ID=$(jq -r '.id' .firecrawl/search-react-hooks.json)
+# Guard: zero-result searches write no output file, so verify before reading the id
+SEARCH_ID=$(jq -er 'select(any(.data[]; length > 0)) | .id' .firecrawl/search-react-hooks.json)
 
 firecrawl search-feedback "$SEARCH_ID" \
   --rating good \

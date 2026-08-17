@@ -7,7 +7,7 @@ allowed-tools:
   - Bash(npx firecrawl-cli *)
 ---
 
-# firecrawl download
+# firecrawl download (invoked as `firecrawl x download`)
 
 > **Experimental.** `download` is available under the `firecrawl x` command group.
 
@@ -22,7 +22,7 @@ Maps the site origin first to discover pages, then scrapes each one into nested 
 ## Quick start
 
 ```bash
-# Interactive wizard (picks format, screenshots, paths for you)
+# Interactive wizard (humans at a TTY only — agents must pass -y or the command blocks on a prompt)
 firecrawl x download https://docs.example.com
 
 # With screenshots
@@ -62,7 +62,7 @@ firecrawl x download https://docs.example.com \
 
 Only the options listed below are supported:
 
-`-f <formats>`, `-H`, `-S`, `--screenshot`, `--full-page-screenshot`, `--only-main-content`, `--include-tags`, `--exclude-tags`, `--wait-for`, `--max-age`, `--country`, `--languages`
+`-f <formats>`, `-H`, `-S`, `--lockdown`, `--screenshot`, `--full-page-screenshot`, `--only-main-content`, `--include-tags`, `--exclude-tags`, `--wait-for`, `--max-age`, `--country`, `--languages`
 
 ## See also
 
