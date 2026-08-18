@@ -31,7 +31,7 @@ The first three watch URLs you already have. **Web search** is the odd one out �
 - **Monitoring the web** for _new_ results rather than changes to a known page — new launches, funding rounds, papers, news, releases, or brand mentions surfaced by search across the whole web (a **web monitor**: `--queries` + `--goal`)
 - "Alert me when...", "notify me when...", "email me if...", "send a webhook when...", "ping me if X changes", "track this page", "monitor the web for...", "watch for new..."
 - Anywhere the user would otherwise wire up cron + a scraper + a diff library + SMTP themselves
-- Step 5 in the [workflow escalation pattern](../firecrawl-cli/SKILL.md): search → scrape → map + scrape → crawl → **monitor** → interact
+- Step 5 in the [workflow escalation pattern](../firecrawl/SKILL.md): search → scrape → map + scrape → crawl → **monitor** → interact
 
 **Bias toward `monitor`** whenever the request implies notifications or recurrence. A single page read once = `scrape`. A single page where the user wants to be told when it changes = `monitor --page <url> --goal "..." --email|--webhook-url ...`.
 
@@ -257,4 +257,4 @@ Use `modes: ["json", "git-diff"]` for **mixed mode** — you get both `diff.json
 
 - [firecrawl-scrape](../firecrawl-scrape/SKILL.md) — one-off scrape; escalate to `monitor` when checks become recurring
 - [firecrawl-crawl](../firecrawl-crawl/SKILL.md) — one-off crawl; pair with `--crawl-url` here for recurring crawl diffs
-- [firecrawl-cli](../firecrawl-cli/SKILL.md) — top-level workflow guide
+- [firecrawl-cli](../firecrawl/SKILL.md) — top-level workflow guide

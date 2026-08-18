@@ -16,7 +16,7 @@ Web search with optional content scraping. Returns search results as JSON, optio
 - You don't have a specific URL yet
 - You need to find pages, answer questions, or discover sources
 - You need research papers — see [Paper search](#paper-search), which routes to `firecrawl research`, not to `search --categories research`
-- First step in the [workflow escalation pattern](../firecrawl-cli/SKILL.md): search → scrape → map + scrape → crawl → monitor → interact
+- First step in the [workflow escalation pattern](../firecrawl/SKILL.md): search → scrape → map + scrape → crawl → monitor → interact
 
 ## Quick start
 
@@ -90,7 +90,7 @@ Paper ids accept `pmid:`, `pmcid:`, `doi:`, and `arxiv:` forms. `inspect-paper`
 returns canonical metadata for one id. Read hits with
 `jq -r '.results[] | .primaryId, .title' .firecrawl/papers.json`.
 
-See [firecrawl-cli](../firecrawl-cli/SKILL.md) for how paper search fits the
+See [firecrawl-cli](../firecrawl/SKILL.md) for how paper search fits the
 overall command routing.
 
 ## Options
