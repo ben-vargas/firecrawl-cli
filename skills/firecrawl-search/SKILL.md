@@ -135,44 +135,38 @@ Search costs 2 credits. After you've actually used the results (or decided they 
 - **Idempotent:** re-submitting for the same search id returns success but no extra refund.
 - **`--silent &`** is the right pattern — exit code 0 even on failure, so a rejected/expired call never crashes your pipeline.
 
-Verify the search returned results before reading its `id`. Zero-result searches write no output file, so the file may be missing — or left over from an earlier search. Only send feedback when this guard succeeds:
+Verify the search returned results before reading its `id`. Zero-result searches write no output file, so the file may be missing — or left over from an earlier search. Call `search-feedback` only inside this guard — a failed guard (non-zero exit: missing file or zero results) skips feedback, while a bare assignment would leave `SEARCH_ID` empty and still fire the call. Send exactly one of the calls below, picking the rating that matches what actually happened:
 
 ```bash
 if SEARCH_ID=$(jq -er 'select(any(.data[]; length > 0)) | .id' .firecrawl/search-react-hooks.json); then
-  : # guard passed — send exactly one of the feedback calls below
+  # Results were useful, with notes on what was still missing
+  firecrawl search-feedback "$SEARCH_ID" \
+    --rating good \
+    --valuable-sources '[{"url":"https://react.dev/reference/react/hooks","reason":"Most authoritative"}]' \
+    --missing-content '[
+      {"topic":"useDeferredValue","description":"No example of useDeferredValue with Suspense"},
+      {"topic":"useTransition","description":"No coverage of useTransition for routing"}
+    ]' \
+    --query-suggestions "Boost react.dev for queries about react hooks" \
+    --silent &
+
+  # Results were partially useful — multiple missing topics, one entry per topic
+  firecrawl search-feedback "$SEARCH_ID" \
+    --rating partial \
+    --missing-content '[
+      {"topic":"useDeferredValue"},
+      {"topic":"useTransition","description":"Need React 18+ examples"},
+      {"topic":"Server Components hooks"}
+    ]' \
+    --silent &
+
+  # Quick form — repeat --missing-content or use comma-separated topics
+  firecrawl search-feedback "$SEARCH_ID" \
+    --rating bad \
+    --missing-content "official api reference: missing v2 endpoints" \
+    --missing-content "code examples in python" \
+    --silent &
 fi
-```
-
-A failed guard (non-zero exit: missing file or zero results) must skip feedback, so call `search-feedback` only inside this conditional — a bare assignment leaves `SEARCH_ID` empty and the call would still fire. Pick the rating that matches what actually happened:
-
-```bash
-# Results were useful, with notes on what was still missing
-firecrawl search-feedback "$SEARCH_ID" \
-  --rating good \
-  --valuable-sources '[{"url":"https://react.dev/reference/react/hooks","reason":"Most authoritative"}]' \
-  --missing-content '[
-    {"topic":"useDeferredValue","description":"No example of useDeferredValue with Suspense"},
-    {"topic":"useTransition","description":"No coverage of useTransition for routing"}
-  ]' \
-  --query-suggestions "Boost react.dev for queries about react hooks" \
-  --silent &
-
-# Results were partially useful — multiple missing topics, one entry per topic
-firecrawl search-feedback "$SEARCH_ID" \
-  --rating partial \
-  --missing-content '[
-    {"topic":"useDeferredValue"},
-    {"topic":"useTransition","description":"Need React 18+ examples"},
-    {"topic":"Server Components hooks"}
-  ]' \
-  --silent &
-
-# Quick form — repeat --missing-content or use comma-separated topics
-firecrawl search-feedback "$SEARCH_ID" \
-  --rating bad \
-  --missing-content "official api reference: missing v2 endpoints" \
-  --missing-content "code examples in python" \
-  --silent &
 ```
 
 **`--missing-content` accepts:**
