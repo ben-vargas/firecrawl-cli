@@ -138,10 +138,12 @@ Search costs 2 credits. After you've actually used the results (or decided they 
 Verify the search returned results before reading its `id`. Zero-result searches write no output file, so the file may be missing — or left over from an earlier search. Only send feedback when this guard succeeds:
 
 ```bash
-SEARCH_ID=$(jq -er 'select(any(.data[]; length > 0)) | .id' .firecrawl/search-react-hooks.json)
+if SEARCH_ID=$(jq -er 'select(any(.data[]; length > 0)) | .id' .firecrawl/search-react-hooks.json); then
+  : # guard passed — send exactly one of the feedback calls below
+fi
 ```
 
-If the guard fails (non-zero exit: missing file or zero results), skip feedback. Otherwise pick the rating that matches what actually happened:
+A failed guard (non-zero exit: missing file or zero results) must skip feedback, so call `search-feedback` only inside this conditional — a bare assignment leaves `SEARCH_ID` empty and the call would still fire. Pick the rating that matches what actually happened:
 
 ```bash
 # Results were useful, with notes on what was still missing
