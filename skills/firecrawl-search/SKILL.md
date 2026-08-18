@@ -90,7 +90,7 @@ Paper ids accept `pmid:`, `pmcid:`, `doi:`, and `arxiv:` forms. `inspect-paper`
 returns canonical metadata for one id. Read hits with
 `jq -r '.results[] | .primaryId, .title' .firecrawl/papers.json`.
 
-See [firecrawl-cli](../firecrawl/SKILL.md) for how paper search fits the
+See [firecrawl](../firecrawl/SKILL.md) for how paper search fits the
 overall command routing.
 
 ## Options

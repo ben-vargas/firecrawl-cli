@@ -257,4 +257,4 @@ Use `modes: ["json", "git-diff"]` for **mixed mode** — you get both `diff.json
 
 - [firecrawl-scrape](../firecrawl-scrape/SKILL.md) — one-off scrape; escalate to `monitor` when checks become recurring
 - [firecrawl-crawl](../firecrawl-crawl/SKILL.md) — one-off crawl; pair with `--crawl-url` here for recurring crawl diffs
-- [firecrawl-cli](../firecrawl/SKILL.md) — top-level workflow guide
+- [firecrawl](../firecrawl/SKILL.md) — top-level workflow guide
