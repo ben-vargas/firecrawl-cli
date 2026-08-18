@@ -272,10 +272,12 @@ Search costs 2 credits per call. **After you finish using a search result**, sen
 # Guard: zero-result searches write no output file, so verify before reading the id.
 # A failed guard (missing file or zero results) skips the feedback call entirely.
 # Rate honestly — replace the placeholder with the rating that matches
-# what actually happened: good | partial | bad.
+# what actually happened: good | partial | bad. The two fields shown
+# satisfy the substantive-content rule for every rating.
 if SEARCH_ID=$(jq -er 'select(any(.data[]; length > 0)) | .id' .firecrawl/search-react-hooks.json); then
   firecrawl search-feedback "$SEARCH_ID" \
     --rating "<good|partial|bad>" \
+    --valuable-sources '[{"url":"https://react.dev/reference/react/hooks","reason":"Authoritative"}]' \
     --missing-content '[{"topic":"useDeferredValue example"},{"topic":"Server Components hooks"}]' \
     --silent &
 fi

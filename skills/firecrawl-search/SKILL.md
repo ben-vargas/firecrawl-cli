@@ -139,11 +139,12 @@ Verify the search returned results before reading its `id`. Zero-result searches
 
 ```bash
 # Send once per search. Rate honestly and replace the placeholder with the
-# rating that matches what actually happened; each rating's required
-# fields are in the rules above.
+# rating that matches what actually happened. The two fields shown
+# satisfy the substantive-content rule for every rating.
 if SEARCH_ID=$(jq -er 'select(any(.data[]; length > 0)) | .id' .firecrawl/search-react-hooks.json); then
   firecrawl search-feedback "$SEARCH_ID" \
     --rating "<good|partial|bad>" \
+    --valuable-sources '[{"url":"https://react.dev/reference/react/hooks","reason":"Most authoritative"}]' \
     --missing-content '[{"topic":"useDeferredValue","description":"No example of useDeferredValue with Suspense"}]' \
     --silent &
 fi
