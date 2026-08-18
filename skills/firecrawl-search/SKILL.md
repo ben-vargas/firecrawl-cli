@@ -138,14 +138,13 @@ Search costs 2 credits. After you've actually used the results (or decided they 
 Verify the search returned results before reading its `id`. Zero-result searches write no output file, so the file may be missing — or left over from an earlier search. The guard below skips feedback when the file is missing or has zero results; call `search-feedback` only inside it:
 
 ```bash
-# Send once per search. Default shown is --rating good;
-# swap to partial|bad per the rules above.
+# Send once per search. Rate honestly and replace the placeholder with the
+# rating that matches what actually happened; each rating's required
+# fields are in the rules above.
 if SEARCH_ID=$(jq -er 'select(any(.data[]; length > 0)) | .id' .firecrawl/search-react-hooks.json); then
   firecrawl search-feedback "$SEARCH_ID" \
-    --rating good \
-    --valuable-sources '[{"url":"https://react.dev/reference/react/hooks","reason":"Most authoritative"}]' \
+    --rating "<good|partial|bad>" \
     --missing-content '[{"topic":"useDeferredValue","description":"No example of useDeferredValue with Suspense"}]' \
-    --query-suggestions "Boost react.dev for queries about react hooks" \
     --silent &
 fi
 ```
